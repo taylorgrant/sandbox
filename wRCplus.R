@@ -30,6 +30,8 @@
 # ----- # 
 lahman.player.search <- function(lastname, firstname=NULL) {
   require(Lahman)
+  require(car)
+  require(hadleyverse)
   if (is.null(firstname)) {
     Master %>% filter_(~str_detect(nameLast, fixed(lastname, ignore_case = TRUE))) %>%
       mutate(MLByear = ifelse(birthMonth <= 6, birthYear, birthYear + 1))
