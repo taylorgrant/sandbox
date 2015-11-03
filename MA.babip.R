@@ -93,3 +93,6 @@ MA.babip <- function(lastname, firstname, window) {
   my_list <- list(p1, player.babip, career.babip)
 }
 
+# ----------------------------- # 
+# Example 
+# MA.babip("trout", "mike", 15)
