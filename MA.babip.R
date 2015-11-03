@@ -1,3 +1,10 @@
+# MA.BABIP
+# BABIP (batting average on balls in play) for the 2014 season. 
+# How do players fare over specific durations during the season 
+# and how do these periods compare to career means? 
+# Evidence of streakiness, luck, both?  
+# 2014 play-by-play data from retrosheet.org, in the data folder. 
+
 lahman.player.search <- function(lastname, firstname) {
   # use to get appropriate IDs for player
   require(Lahman)
@@ -96,3 +103,4 @@ MA.babip <- function(lastname, firstname, window) {
 # ----------------------------- # 
 # Example 
 # MA.babip("trout", "mike", 15)
+# MA.babip("stubbs", "drew", 15)
