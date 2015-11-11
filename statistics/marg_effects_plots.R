@@ -52,7 +52,7 @@ seev <- seev %>% mutate(MVZ = seq(-2, 13, length.out= 72),
 
 ## plotting (ggplot doesn't easily allow two y axes, so can't 
 ## plot the histogram underneath. rely on rug plot instead.)
- 
+library(ggplot)
 p1 <- ggplot(data = seev) + 
   scale_y_continuous("Marginal Effect of Slavic Share") + 
   scale_x_continuous(limits = c(-2,12)) +
