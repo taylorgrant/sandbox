@@ -20,7 +20,7 @@ m1 <- lm(xenovote ~ slavicshare + changenonslav + slavicshare:changenonslav + in
 ## calculate clusetered SE based upon our cluster choice
 library(multiwayvcov)
 m1.vcov <-cluster.vcov(m1, seev$region)
-
+ 
 # get estimates with new SEs
 est <- coeftest(m1, m1.vcov)
 
