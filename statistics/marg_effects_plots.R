@@ -11,7 +11,7 @@ names(seev)[7] <- "slavicshare"
 names(seev)[8] <- "changenonslav"
 names(seev)[10] <- "slavicshare_changenonslav"
 
-## estimate the model (interaction = slavicshare_changenonslav)
+## estimate the model (interaction = slavicshare:changenonslav)
 m1 <- lm(xenovote ~ slavicshare + changenonslav + slavicshare:changenonslav + inc9903 +  
            eduhi02 + unemp02 + apt9200 + vsall03 + brdcont, data = seev)
 
