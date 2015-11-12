@@ -26,6 +26,13 @@
 # of similar players. Most data is gathered from the web, however
 # one file ("wRC_PA.league.csv") is in data folder.
 ## --------------------------------------------------------- #
+require(Lahman)
+install.packages("devtools")
+library(devtools)
+install_github("aaboyles/hadleyverse")
+library(hadleyverse)
+require(rvest)
+require(car)
 
 # ----- # 
 lahman.player.search <- function(lastname, firstname=NULL) {
