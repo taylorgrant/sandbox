@@ -1,3 +1,8 @@
+# ------------------------------------------------ #
+# Twitter bot tweets out periodic surf conditions in
+# El Porto, CA. At night, it tweets out the 6am
+# morning surf forecast. 
+# ------------------------------------------------ #
 #devtools::install_github("geoffjentry/twitteR")
 library(twitteR)
 library(httr)
@@ -129,5 +134,5 @@ if (cur_time > sunset & cur_time < sunrise + days(1)) {
   tweet(pred_surf)
 }
 
-
+## Uses launchd to set times for periodic tweets
 
