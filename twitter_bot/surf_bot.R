@@ -12,7 +12,7 @@ library(lubridate)
 library(stringr)
 library(dplyr)
 
-## Use this: http://stat545-ubc.github.io/bit003_api-key-env-var.html
+## Use this: http://www.r-datacollection.com/blog/How-to-conduct-a-tombola-with-R/
 ## to store API key locally
 # # ---------------------- #
 # credentials <- c(
