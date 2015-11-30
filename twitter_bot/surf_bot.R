@@ -1,0 +1,133 @@
+#devtools::install_github("geoffjentry/twitteR")
+library(twitteR)
+library(httr)
+library(base64enc)
+library(rvest)
+library(lubridate)
+library(stringr)
+library(dplyr)
+
+## Use this: http://stat545-ubc.github.io/bit003_api-key-env-var.html
+## to store API key locally
+# # ---------------------- #
+# credentials <- c(
+#   "twitter_api_key=blahblahblahblah",
+#   "twitter_api_secret=blahblahblahblahblahblahblahblahblahblahblahblah",
+#   "twitter_access_token=blahblahblahblahblahblahblahblahblahblahblahblah",
+#   "twitter_access_token_secret=blahblahblahblahblahblahblahblah"
+# )
+# 
+# fname <- paste0(normalizePath("~/"),"/.Renviron")
+# writeLines(credentials, fname)
+# 
+# browseURL(fname)
+# ---------------------- #
+
+# setup authentication
+api_key <- Sys.getenv("twitter_api_key")
+api_secret <- Sys.getenv("twitter_api_secret")
+access_token <- Sys.getenv("twitter_access_token")
+access_token_secret <- Sys.getenv("twitter_access_token_secret")
+
+options(httr_oauth_cache = TRUE)
+ 
+# httr:::guess_cache()
+# httr:::use_cache()
+# getwd()
+
+setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
+
+# --------------------------- # 
+# Scrape Data: Surf Report for El Porto (surfline.com) # 
+url <- "http://www.surfline.com/surf-report/el-porto-southern-california_4900/"
+
+# --------------------------- #
+## grab sunrise and sunset
+rise_set <- read_html(url) %>% 
+  html_nodes("div:nth-child(16) span") %>% 
+  html_text()
+
+sunrise <- str_extract(rise_set, "([1-9][:][0-5][0-9][A][M])")
+sunrise <- strptime(sunrise, "%I:%M %p")
+sunset <- str_extract(rise_set, "([1-9][:][0-5][0-9][P][M])")
+sunset <- strptime(sunset, "%I:%M %p")
+
+cur_time <- now()
+day_plus1 <- cur_time + days(1)
+weekday <- as.character(wday(day_plus1, label=TRUE, abbr=FALSE))
+month <- month(day_plus1)
+day <- day(day_plus1)
+
+# --------------------------- #
+## Current Conditions
+cast <- read_html(url) %>%
+  html_nodes("#observed-spot-conditions , #observed-wave-description, #observed-wave-range") %>%
+  html_text() 
+
+# clean up conditions
+wave <- cast[[1]] %>% str_replace("m", "") %>% str_c("ft")
+height <- cast[[2]] %>% str_replace_all(("\n"), "") %>% str_replace("-", "") %>%
+  str_trim("both") 
+conditions <- cast[[3]] %>% str_replace("Conditions", "") %>% str_trim("right")
+
+## Time of conditions 
+full <- read_html(url) %>%
+  html_nodes("strong") %>%
+  html_text()
+
+# clean up time 
+date <- gsub("\n","", full[11])
+time <- str_extract(date, "((1)?[0-9][:][0-9][0-9][a-p][m])")
+
+# change display time so that the reporting time is 
+# not always the same 
+time2 <- strptime(time, '%R')
+dis_time <- ifelse((time2 - Sys.time() > -1), strftime(Sys.time(),"%I:%M %p"), time)
+
+## Water temp
+h20temp <- read_html(url) %>%
+  html_nodes(":nth-child(7) div:nth-child(2) span:nth-child(5)") %>% 
+  html_text() %>%
+  str_replace_all("\n", "") %>% 
+  str_trim("both")
+
+
+# --------------------------- #
+# Predicted Conditions - for the scheduled tweet
+
+root <- "http://magicseaweed.com/El-Porto-Beach-Surf-Report/2677/#" 
+pred_url <- str_c(root, weekday, day, month,"")
+
+pred <- read_html(pred_url) %>%
+  html_nodes("table") %>%
+  .[[3]] %>%
+  html_table(fill=TRUE, header = TRUE )
+
+## want the prediction of the day in question for 
+## the 6am time
+pred_tbl <- pred[22, c(1,2,5,6,7,14,16:18)]
+colnames(pred_tbl) <- c("Time", "Surf", "Swell", "Period", "Direction", "Wind", "Weather", 'Temp', 'Prob')
+onshore <- ifelse(pred_tbl$Direction > 210 & pred_tbl$Direction < 345, "Onshore", NULL)
+
+## generate tweet text
+current_surf <- str_c(dis_time,": ", "Surf conditions are ", conditions,". ", 
+                  "Waves are ", height,": ", wave,". ", "Water Temp: ",h20temp, ". #elporto #surf", "")
+
+pred_surf <- str_c(pred_tbl$Time, " forecast for ", month,"/", day , ": ", "Surf ", pred_tbl$Surf, "; ", onshore, " Swell ", 
+                   pred_tbl$Swell, " w/ ", pred_tbl$Period, " period; ", pred_tbl$Weather, " & ", pred_tbl$Temp, 
+                   " #elporto #surf" )
+
+## send tweet
+if (cur_time > sunrise & cur_time < sunset) {
+  pred_surf <- NULL
+  current_surf
+  tweet(current_surf)
+}
+if (cur_time > sunset & cur_time < sunrise + days(1)) {
+  current_surf <- NULL
+  pred_surf
+  tweet(pred_surf)
+}
+
+
+
