@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # -------------------------------------# 
 # A twitter bot that periodically tweets 
 # out the surf conditions in El Porto, CA. 
@@ -5,6 +6,13 @@
 # surf forecast for the next day. 
 # -------------------------------------#
 
+=======
+# ------------------------------------------------ #
+# Twitter bot tweets out periodic surf conditions in
+# El Porto, CA. At night, it tweets out the 6am
+# morning surf forecast. 
+# ------------------------------------------------ #
+>>>>>>> origin/master
 #devtools::install_github("geoffjentry/twitteR")
 library(twitteR)
 library(httr)
@@ -14,6 +22,11 @@ library(lubridate)
 library(stringr)
 library(dplyr)
 
+<<<<<<< HEAD
+=======
+## Use this: http://www.r-datacollection.com/blog/How-to-conduct-a-tombola-with-R/
+## to store API key locally
+>>>>>>> origin/master
 # # ---------------------- #
 # credentials <- c(
 #   "twitter_api_key=zL8xbUrH9ZqN9a9ULHVAN0kSO",
@@ -46,7 +59,6 @@ setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
 # Scrape Data: Surf Report for El Porto (surfline.com) # 
 url <- "http://www.surfline.com/surf-report/el-porto-southern-california_4900/"
 
-# --------------------------- #
 ## grab sunrise and sunset
 rise_set <- read_html(url) %>% 
   html_nodes("div:nth-child(16) span") %>% 
@@ -63,6 +75,7 @@ weekday <- as.character(wday(day_plus1, label=TRUE, abbr=FALSE))
 month <- month(day_plus1)
 day <- day(day_plus1)
 
+<<<<<<< HEAD
 # --------------------------- #
 # Morning - Current conditions
 if (cur_time > sunrise & cur_time < sunrise + hours(2)) {
@@ -123,6 +136,69 @@ if (cur_time > sunrise + hours(2) & cur_time < sunset) {
                         cond[[3]][2],". ", wind[[1]][3], " Wind at ", wind[[1]][1],". ", temp[[1]][1], " and ",
                         temp[[1]][3],". ", "Water temp: ", temp[[1]][5],temp[[1]][6])
   
+=======
+## Current Conditions
+cast <- read_html(url) %>%
+  html_nodes("#observed-spot-conditions , #observed-wave-description, #observed-wave-range") %>%
+  html_text() 
+
+# clean up conditions
+wave <- cast[[1]] %>% str_replace("m", "") %>% str_c("ft")
+height <- cast[[2]] %>% str_replace_all(("\n"), "") %>% str_replace("-", "") %>%
+  str_trim("both") 
+conditions <- cast[[3]] %>% str_replace("Conditions", "") %>% str_trim("right")
+
+## Time of conditions 
+full <- read_html(url) %>%
+  html_nodes("strong") %>%
+  html_text()
+
+# clean up time 
+date <- gsub("\n","", full[11])
+time <- str_extract(date, "((1)?[0-9][:][0-9][0-9][a-p][m])")
+
+# change display time so that the reporting time is 
+# not always the same 
+time2 <- strptime(time, '%R')
+dis_time <- ifelse((time2 - Sys.time() > -1), strftime(Sys.time(),"%I:%M %p"), time)
+
+## Water temp
+h20temp <- read_html(url) %>%
+  html_nodes(":nth-child(7) div:nth-child(2) span:nth-child(5)") %>% 
+  html_text() %>%
+  str_replace_all("\n", "") %>% 
+  str_trim("both")
+
+
+# --------------------------- #
+# Predicted Conditions - for the evening tweet
+
+root <- "http://magicseaweed.com/El-Porto-Beach-Surf-Report/2677/#" 
+pred_url <- str_c(root, weekday, day, month,"")
+
+pred <- read_html(pred_url) %>%
+  html_nodes("table") %>%
+  .[[3]] %>%
+  html_table(fill=TRUE, header = TRUE )
+
+## want the prediction of the day in question for 
+## the 6am time
+pred_tbl <- pred[22, c(1,2,5,6,7,14,16:18)]
+colnames(pred_tbl) <- c("Time", "Surf", "Swell", "Period", "Direction", "Wind", "Weather", 'Temp', 'Prob')
+onshore <- ifelse(pred_tbl$Direction > 210 & pred_tbl$Direction < 345, "Onshore", NULL)
+
+## generate tweet text
+current_surf <- str_c(dis_time,": ", "Surf conditions are ", conditions,". ", 
+                  "Waves are ", height,": ", wave,". ", "Water Temp: ",h20temp, ". #elporto #surf", "")
+
+pred_surf <- str_c(pred_tbl$Time, " forecast for ", month,"/", day , ": ", "Surf ", pred_tbl$Surf, "; ", onshore, " Swell ", 
+                   pred_tbl$Swell, " w/ ", pred_tbl$Period, " period; ", pred_tbl$Weather, " & ", pred_tbl$Temp, 
+                   " #elporto #surf" )
+
+## send tweet
+if (cur_time > sunrise & cur_time < sunset) {
+  pred_surf <- NULL
+>>>>>>> origin/master
   current_surf
   tweet(current_surf)
 }
@@ -155,10 +231,14 @@ if (cur_time > sunset & cur_time < sunrise + days(1)) {
   tweet(pred_surf)
 }
 
+<<<<<<< HEAD
 # # 
 # # # create log entry
 # line_c <- paste( as.character(Sys.time()), current_surf ,sep="\t" )
 # line_p <- paste( as.character(Sys.time()), pred_surf ,sep="\t" )
 # write(line_c, line_p, file="tweets.log", ncol=2, append=TRUE)
 
+=======
+## Uses launchd to set times for periodic tweets
+>>>>>>> origin/master
 
