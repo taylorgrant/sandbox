@@ -1,3 +1,10 @@
+# -------------------------------------# 
+# A twitter bot that periodically tweets 
+# out the surf conditions in El Porto, CA. 
+# After sunset, the bot tweets out the 6AM
+# surf forecast for the next day. 
+# -------------------------------------#
+
 #devtools::install_github("geoffjentry/twitteR")
 library(twitteR)
 library(httr)
@@ -7,14 +14,12 @@ library(lubridate)
 library(stringr)
 library(dplyr)
 
-## Use this: http://stat545-ubc.github.io/bit003_api-key-env-var.html
-## to store API key locally
 # # ---------------------- #
 # credentials <- c(
-#   "twitter_api_key=blahblahblahblah",
-#   "twitter_api_secret=blahblahblahblahblahblahblahblahblahblahblahblah",
-#   "twitter_access_token=blahblahblahblahblahblahblahblahblahblahblahblah",
-#   "twitter_access_token_secret=blahblahblahblahblahblahblahblah"
+#   "twitter_api_key=zL8xbUrH9ZqN9a9ULHVAN0kSO",
+#   "twitter_api_secret=btbCeB2yxIpnvl2b9tE0EuUFXDLnJjqcubGjnv53J28YGzRaUT",
+#   "twitter_access_token=4322879055-wIx4g6D9qbOb2wAb7R9Y58c0nzn7GI3J3EYVUux",
+#   "twitter_access_token_secret=7ASJhfd6WdFnw78FfpdGw8BWPsP9NUf8fWllK89j3qo1I"
 # )
 # 
 # fname <- paste0(normalizePath("~/"),"/.Renviron")
@@ -30,7 +35,7 @@ access_token <- Sys.getenv("twitter_access_token")
 access_token_secret <- Sys.getenv("twitter_access_token_secret")
 
 options(httr_oauth_cache = TRUE)
- 
+
 # httr:::guess_cache()
 # httr:::use_cache()
 # getwd()
@@ -59,75 +64,101 @@ month <- month(day_plus1)
 day <- day(day_plus1)
 
 # --------------------------- #
-## Current Conditions
-cast <- read_html(url) %>%
-  html_nodes("#observed-spot-conditions , #observed-wave-description, #observed-wave-range") %>%
-  html_text() 
-
-# clean up conditions
-wave <- cast[[1]] %>% str_replace("m", "") %>% str_c("ft")
-height <- cast[[2]] %>% str_replace_all(("\n"), "") %>% str_replace("-", "") %>%
-  str_trim("both") 
-conditions <- cast[[3]] %>% str_replace("Conditions", "") %>% str_trim("right")
-
-## Time of conditions 
-full <- read_html(url) %>%
-  html_nodes("strong") %>%
-  html_text()
-
-# clean up time 
-date <- gsub("\n","", full[11])
-time <- str_extract(date, "((1)?[0-9][:][0-9][0-9][a-p][m])")
-
-# change display time so that the reporting time is 
-# not always the same 
-time2 <- strptime(time, '%R')
-dis_time <- ifelse((time2 - Sys.time() > -1), strftime(Sys.time(),"%I:%M %p"), time)
-
-## Water temp
-h20temp <- read_html(url) %>%
-  html_nodes(":nth-child(7) div:nth-child(2) span:nth-child(5)") %>% 
-  html_text() %>%
-  str_replace_all("\n", "") %>% 
-  str_trim("both")
-
+# Morning - Current conditions
+if (cur_time > sunrise & cur_time < sunrise + hours(2)) {
+  ## Current Conditions
+  cast <- read_html(url) %>%
+    html_nodes("#observed-spot-conditions , #observed-wave-description, #observed-wave-range") %>%
+    html_text() 
+  
+  # clean up conditions
+  wave <- cast[[1]] %>% str_replace("m", "") %>% str_c("ft")
+  height <- cast[[2]] %>% str_replace_all(("\n"), "") %>% str_replace("-", "") %>%
+    str_trim("both") 
+  conditions <- cast[[3]] %>% str_replace("Conditions", "") %>% str_trim("right")
+  
+  ## Time of conditions 
+  full <- read_html(url) %>%
+    html_nodes("strong") %>%
+    html_text()
+  
+  # clean up time 
+  date <- gsub("\n","", full[11])
+  time <- str_extract(date, "((1)?[0-9][:][0-9][0-9][a-p][m])")
+  
+  # change display time so that the reporting time is 
+  # not always the same 
+  time2 <- strptime(time, '%R')
+  dis_time <- ifelse((time2 - Sys.time() > -1), strftime(Sys.time(),"%I:%M %p"), paste("As of", time, ""))
+  
+  ## Water temp
+  h20temp <- read_html(url) %>%
+    html_nodes(":nth-child(7) div:nth-child(2) span:nth-child(5)") %>% 
+    html_text() %>%
+    str_replace_all("\n", "") %>% 
+    str_trim("both")
+  
+  morning_surf <- str_c(dis_time,": ", "Surf conditions are ", conditions,". ", 
+                        "Waves are ", height,": ", wave,". ", "Water Temp: ",h20temp, ". #elporto #surf", "")
+  morning_surf
+  tweet(morning_surf)
+}
 
 # --------------------------- #
-# Predicted Conditions - for the scheduled tweet
-
-root <- "http://magicseaweed.com/El-Porto-Beach-Surf-Report/2677/#" 
-pred_url <- str_c(root, weekday, day, month,"")
-
-pred <- read_html(pred_url) %>%
-  html_nodes("table") %>%
-  .[[3]] %>%
-  html_table(fill=TRUE, header = TRUE )
-
-## want the prediction of the day in question for 
-## the 6am time
-pred_tbl <- pred[22, c(1,2,5,6,7,14,16:18)]
-colnames(pred_tbl) <- c("Time", "Surf", "Swell", "Period", "Direction", "Wind", "Weather", 'Temp', 'Prob')
-onshore <- ifelse(pred_tbl$Direction > 210 & pred_tbl$Direction < 345, "Onshore", NULL)
-
-## generate tweet text
-current_surf <- str_c(dis_time,": ", "Surf conditions are ", conditions,". ", 
-                  "Waves are ", height,": ", wave,". ", "Water Temp: ",h20temp, ". #elporto #surf", "")
-
-pred_surf <- str_c(pred_tbl$Time, " forecast for ", month,"/", day , ": ", "Surf ", pred_tbl$Surf, "; ", onshore, " Swell ", 
-                   pred_tbl$Swell, " w/ ", pred_tbl$Period, " period; ", pred_tbl$Weather, " & ", pred_tbl$Temp, 
-                   " #elporto #surf" )
-
-## send tweet
-if (cur_time > sunrise & cur_time < sunset) {
-  pred_surf <- NULL
+## Early Morning / Afternoon - Current Conditions 
+if (cur_time > sunrise + hours(2) & cur_time < sunset) {
+  current_url <- "http://magicseaweed.com/El-Porto-Beach-Surf-Report/2677/"
+  
+  current <- read_html(current_url) %>%
+    html_nodes(".msw-fc-current-v0 .row") %>%
+    html_text()  %>% str_split("        ") 
+  
+  # break into lists for easy use
+  cond <- current[[1]][c(8,10:13)] %>% str_trim("both") %>%
+    str_split("   ")
+  wind <- cond[[2]][1] %>% str_split(" ")
+  temp <- cond[[5]][1] %>% str_split(" ")
+  
+  current_surf <- str_c(strftime(Sys.time(),"%I:%M %p"),":", " Waves ", cond[1], " with a ", cond[[3]][1], " of",
+                        cond[[3]][2],". ", wind[[1]][3], " Wind at ", wind[[1]][1],". ", temp[[1]][1], " and ",
+                        temp[[1]][3],". ", "Water temp: ", temp[[1]][5],temp[[1]][6])
+  
   current_surf
   tweet(current_surf)
 }
+# --------------------------- #
+# Predicted Conditions - for the scheduled tweet
 if (cur_time > sunset & cur_time < sunrise + days(1)) {
-  current_surf <- NULL
+  root <- "http://magicseaweed.com/El-Porto-Beach-Surf-Report/2677/#" 
+  pred_url <- str_c(root, weekday, day, month,"")
+  
+  pred <- read_html(pred_url) %>%
+    html_nodes("table") %>%
+    .[[3]] %>%
+    html_table(fill=TRUE, header = TRUE )
+  
+  ## want the prediction of the day in question for 
+  ## the 6am time
+  pred_tbl <- pred[22, c(1,2,5,6,7,14,16:18)]
+  colnames(pred_tbl) <- c("Time", "Surf", "Swell", "Period", "Direction", "Wind", "Weather", 'Temp', 'Prob')
+  onshore <- ifelse(pred_tbl$Direction > 210 & pred_tbl$Direction < 345, "Onshore", NULL)
+  
+  ## generate tweet text
+  # current_surf <- str_c(dis_time,": ", "Surf conditions are ", conditions,". ", 
+  #                       "Waves are ", height,": ", wave,". ", "Water Temp: ",h20temp, ". #elporto #surf", "")
+  
+  pred_surf <- str_c(pred_tbl$Time, " forecast for ", month,"/", day , ": ", "Surf ", pred_tbl$Surf, "; ", onshore, " Swell ", 
+                     pred_tbl$Swell, " w/ ", pred_tbl$Period, " period; ", pred_tbl$Weather, " & ", pred_tbl$Temp, 
+                     " #elporto #surf" )
+  
   pred_surf
   tweet(pred_surf)
 }
 
+# # 
+# # # create log entry
+# line_c <- paste( as.character(Sys.time()), current_surf ,sep="\t" )
+# line_p <- paste( as.character(Sys.time()), pred_surf ,sep="\t" )
+# write(line_c, line_p, file="tweets.log", ncol=2, append=TRUE)
 
 
