@@ -46,7 +46,6 @@ setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
 # Scrape Data: Surf Report for El Porto (surfline.com) # 
 url <- "http://www.surfline.com/surf-report/el-porto-southern-california_4900/"
 
-# --------------------------- #
 ## grab sunrise and sunset
 rise_set <- read_html(url) %>% 
   html_nodes("div:nth-child(16) span") %>% 
@@ -63,7 +62,6 @@ weekday <- as.character(wday(day_plus1, label=TRUE, abbr=FALSE))
 month <- month(day_plus1)
 day <- day(day_plus1)
 
-# --------------------------- #
 ## Current Conditions
 cast <- read_html(url) %>%
   html_nodes("#observed-spot-conditions , #observed-wave-description, #observed-wave-range") %>%
@@ -98,7 +96,7 @@ h20temp <- read_html(url) %>%
 
 
 # --------------------------- #
-# Predicted Conditions - for the scheduled tweet
+# Predicted Conditions - for the evening tweet
 
 root <- "http://magicseaweed.com/El-Porto-Beach-Surf-Report/2677/#" 
 pred_url <- str_c(root, weekday, day, month,"")
