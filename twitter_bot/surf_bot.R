@@ -14,12 +14,14 @@ library(lubridate)
 library(stringr)
 library(dplyr)
 
+# using this to store the API locally
+# http://www.r-datacollection.com/blog/How-to-conduct-a-tombola-with-R/
 # # ---------------------- #
 # credentials <- c(
-#   "twitter_api_key=zL8xbUrH9ZqN9a9ULHVAN0kSO",
-#   "twitter_api_secret=btbCeB2yxIpnvl2b9tE0EuUFXDLnJjqcubGjnv53J28YGzRaUT",
-#   "twitter_access_token=4322879055-wIx4g6D9qbOb2wAb7R9Y58c0nzn7GI3J3EYVUux",
-#   "twitter_access_token_secret=7ASJhfd6WdFnw78FfpdGw8BWPsP9NUf8fWllK89j3qo1I"
+#   "twitter_api_key=blahblahblah_blah",
+#   "twitter_api_secret=blahblahblah_blahblahblahblah_blah",
+#   "twitter_access_token=blahblahblah_blahblahblahblah_blah",
+#   "twitter_access_token_secret=blahblahblah_blah"
 # )
 # 
 # fname <- paste0(normalizePath("~/"),"/.Renviron")
