@@ -2,7 +2,8 @@
 # A twitter bot that periodically tweets 
 # out the surf conditions in El Porto, CA. 
 # After sunset, the bot tweets out the 6AM
-# surf forecast for the next day. 
+# surf forecast for the next day.
+# TwitterHandle: @ElPortoSurf
 # -------------------------------------#
 
 #devtools::install_github("geoffjentry/twitteR")
