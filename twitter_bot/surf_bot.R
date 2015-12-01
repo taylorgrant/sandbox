@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # -------------------------------------# 
 # A twitter bot that periodically tweets 
 # out the surf conditions in El Porto, CA. 
