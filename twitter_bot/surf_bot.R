@@ -16,10 +16,10 @@ library(dplyr)
 
 # # ---------------------- #
 # credentials <- c(
-#   "twitter_api_key=zL8xbUrH9ZqN9a9ULHVAN0kSO",
-#   "twitter_api_secret=btbCeB2yxIpnvl2b9tE0EuUFXDLnJjqcubGjnv53J28YGzRaUT",
-#   "twitter_access_token=4322879055-wIx4g6D9qbOb2wAb7R9Y58c0nzn7GI3J3EYVUux",
-#   "twitter_access_token_secret=7ASJhfd6WdFnw78FfpdGw8BWPsP9NUf8fWllK89j3qo1I"
+#   "twitter_api_key=blahblahblah",
+#   "twitter_api_secret=blahblahblahblahblah",
+#   "twitter_access_token=blahblahblahblahblah",
+#   "twitter_access_token_secret=blahblahblahblahblah"
 # )
 # 
 # fname <- paste0(normalizePath("~/"),"/.Renviron")
