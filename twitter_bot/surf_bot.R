@@ -111,24 +111,31 @@ if (cur_time > sunrise & cur_time < sunrise + hours(2)) {
 ## Early Morning / Afternoon - Current Conditions 
 if (cur_time > sunrise + hours(2) & cur_time < sunset) {
   current_url <- "http://magicseaweed.com/El-Porto-Beach-Surf-Report/2677/"
-  
+  current_url <- "http://magicseaweed.com/South-Beach-Surf-Report/298/"
   current <- read_html(current_url) %>%
     html_nodes(".msw-fc-current-v0 .row") %>%
-    html_text()  %>% str_split("        ") %>%
-    unlist(current)
+    html_text()  %>% str_split("        ")
+  
+  current <- unlist(current)
   
   # break into lists for easy use
-  # first drop "Wind Swell" 
-  cond <- current[-which(str_detect(current, "Wind Swell"))]
-  cond <- cond[c(8,10:13)] %>% str_trim("both") %>%
-    str_split("   ")
-  wind <- cond[[2]][1] %>% str_split(" ")
-  temp <- cond[[5]][1] %>% str_split(" ")
+  # first drop "Wind Swell"
+  cond <- current
+  cond <- cond[!str_detect(cond, "Wind Swell")]
+  cond <- cond[!str_detect(cond, "Secondary Swell")]
+  cond[cond==""] <- NA
+  cond <- cond[complete.cases(cond)]
+  cond <- str_trim(cond, "both") %>%
+    str_split(" ")
   
-  current_surf <- str_c(strftime(Sys.time(),"%I:%M %p"),":", " Waves ", cond[1], " with a ", cond[[3]][1], " of",
-                        cond[[3]][2],". ", wind[[1]][3], " Wind at ", wind[[1]][1],". ", temp[[1]][1], " and ",
-                        temp[[1]][3],". ", "Water temp: ", temp[[1]][5],temp[[1]][6], ". #elporto #surf",)
+  waves <- cond[[1]]
+  wind <- cond[[2]]
+  swell <- cond[[3]]
+  weather <- cond[[4]]
   
+  current_surf <- str_c(strftime(Sys.time(),"%I:%M %p"),":"," Waves ", waves, " with a ", swell[2], " of ", 
+                        swell[6], " at ", swell[8], ". ", wind[3], " wind at ", wind[1], ". ", weather[1], " and ",
+                        weather[3], " Water temp: ", weather[5], weather[6], ". #elporto #surf")
   current_surf
   tweet(current_surf)
 }
