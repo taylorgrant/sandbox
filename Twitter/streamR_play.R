@@ -3,17 +3,34 @@ library(streamR)
 library(hadleyverse)
 library(maps)
 
-load("my_oauth.Rdata")
-setwd("")
+# --------------------------- # 
+# Setting up the handshake 
+library(ROAuth)
+requestURL <- "https://api.twitter.com/oauth/request_token"
+accessURL <- "https://api.twitter.com/oauth/access_token"
+authURL <- "https://api.twitter.com/oauth/authorize"
+consumerKey <- api_key
+consumerSecret <- api_secret
+my_oauth <- OAuthFactory$new(consumerKey = consumerKey, consumerSecret = consumerSecret,  
+                             requestURL = requestURL, accessURL = accessURL, authURL = authURL)
+my_oauth$handshake(cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"))
+## at this point enter the Twitter pin  into the R console
+# --------------------------- #
 
-# grab data for 90 minutes (12/2 - 10:40am)
+#load("my_oauth.Rdata")
+#setwd("")
+
+# --------------------------- #
+# grab data for 90 minutes in United States
+# geoJSON coordinates for other cities can be found 
+# at https://gist.github.com/taylorgrant/ba1d49272e4bf1da5a0a
 filterStream("tweetsUS90.json", locations = c(-125, 25, -66, 50), timeout = 5400, 
               oauth = my_oauth)
 tweets_df <- parseTweets("tweetsUS90.json", verbose = FALSE)
-points <- data.frame(x = as.numeric(tweets_df$place_lon), y = as.numeric(tweets_df$place_lat))
-points <- points[points$y > 25, ]
 
 ## plotting out the usage on a map
+points <- data.frame(x = as.numeric(tweets_df$place_lon), y = as.numeric(tweets_df$place_lat))
+points <- points[points$y > 25, ]
 xlim <- c(-124.738281, -66.601563)
 ylim <- c(24.039321, 50.856229)
 
@@ -21,7 +38,6 @@ map("world", col="#E8E8E8", fill=TRUE, bg="white", lwd=0.4, xlim=xlim, ylim=ylim
 points(points, pch=16, cex=.10, col="red")
 map("state", fill=FALSE, bg="white", add = TRUE)
 
-library(hadleyverse)
 # ------------------ #  
 # What are people using to tweet?
 # will need these eventually
@@ -39,8 +55,8 @@ local <- tweets_df$full_name
 local <- str_split(local, ", ")
 local <- do.call(rbind, local)
 local <- local[,1:2]
-
 local <- data.frame(local, stringsAsFactors = FALSE)
+
 # merge in state.abb, convert USA to state, drop any that aren't states
 regions <-  left_join(local, state1, by = c("X1" = "state.name")) %>%
   mutate(X2 = ifelse(X2 == "USA", state.abb, X2)) %>% 
@@ -49,9 +65,7 @@ regions <-  left_join(local, state1, by = c("X1" = "state.name")) %>%
   left_join(state2, by = c("X2" = "state.abb"))
 colnames(regions) <- c("area", "st_abb", "source", "region")
 
-# regions are NA
-summary(regions[is.na(regions$region),])  # DC 
-# code DC as Northeast
+# DC is considered NA, change to Northeast
 regions$region[is.na(regions$region)] <- "Northeast"
 
 # summarize and put into dotplot
@@ -59,16 +73,6 @@ df_regions <- regions %>%
   group_by(region, source) %>% 
   summarise(total = n()) %>% data.frame() %>%
   arrange(desc(total))
-
-df_regions %>% 
-  group_by(region) %>% 
-  summarise(tweets = sum(total)) # south more than doubles the rest of country
-
-df_states <- regions %>% 
-  group_by(st_abb) %>% 
-  summarise(tweets = n()) %>%
-  data.frame() %>% 
-  arrange(desc(tweets))
 
 top5 <- df_regions %>%
   group_by(region) %>%
@@ -79,7 +83,8 @@ ggplot(top5, aes(x = total, y = region, colour = source)) +
   geom_point(size=5) + 
   labs(title = "How do people Tweet", x = "Total", y = "Region") + theme_bw()
 
-# ---------------- # 
+# ---------------- #
+## follower count and usage
 summary(tweets_df$followers_count)
 quantile(tweets_df$followers_count, p = seq(0,.95, .05))
 
@@ -103,6 +108,7 @@ efficiency <- tweets_df %>%
   arrange(desc(twit_ratio)) %>% 
   data.frame()
 
+# dplyr mutate doesn't work with date/time format? 
 efficiency$date <- strptime(efficiency$user_created_at, format =  "%a %b %d %H:%M:%S %z %Y")
 efficiency$acct_age <- (as.numeric(now() - efficiency$date))/24/7 # age of account in weeks
 efficiency$percentile <- ecdf(efficiency$followers_count)(efficiency$followers_count) # add in efficiency percentiles
@@ -162,7 +168,6 @@ colors <- pal(100)
 xlim <- c(-124.738281, -66.601563)
 ylim <- c(24.039321, 50.856229)
 map("world", col="#232323", fill=TRUE, bg="black", lwd=0.01, xlim=xlim, ylim=ylim, interior=FALSE)
-
 for (i in 1:3) { 
   for (j in 1:dim(inter_df)[1]) {
     inter <- gcIntermediate(c(inter_df[j,]$to_lon, inter_df[j,]$to_lat), c(inter_df[j,]$from_lon, inter_df[j,]$from_lat), 
@@ -171,10 +176,3 @@ for (i in 1:3) {
     lines(inter, col=colors[colindex], lwd=0.05)
   }
 }
-
- 
-
-
-
-
-
