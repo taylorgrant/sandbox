@@ -3,7 +3,7 @@ in the data folder.
 
 
 |Category                                         | Q1-19| Q2-19| Q3-19| Q4-19| Q1-20| Non-Lux Avg
-Q1-20|
+                                                                                            Q1-20       |
 |:------------------------------------------------|-----:|-----:|-----:|-----:|-----:|-----------------:|
 |Aided Ad Recall (% Seeing or Hearing A lot/Some) |    44|    46|    42|    43|    45|                46|
 |Awareness (% Very/Somewhat)                      |    68|    64|    66|    66|    65|                70|
