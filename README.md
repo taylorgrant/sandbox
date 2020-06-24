@@ -2,10 +2,22 @@ Random code. Everything should be pretty well annotated. If data is required, it
 in the data folder.  
 
 
-|Category                                         | Q1-19| Q2-19| Q3-19| Q4-19| Q1-20| Non-Lux Avg|
-|:------------------------------------------------|-----:|-----:|-----:|-----:|-----:|-----------:|
-|Aided Ad Recall (% Seeing or Hearing A lot/Some) |    44|    46|    42|    43|    45|          46|
-|Awareness (% Very/Somewhat)                      |    68|    64|    66|    66|    65|          70|
-|Familiarity (% Very)                             |    22|    22|    24|    26|    23|          29|
-|Overall Opinion (Top 2 Box %)                    |    39|    41|    45|    42|    41|          52|
-|Purchase Consideration (Top 2 Box %)             |    33|    35|    35|    35|    36|          42|
+|Category                       | Q1-19| Q1-20| Difference|Key                |
+|:------------------------------|-----:|-----:|----------:|:------------------|
+|Advanced Features              |  -0.8|  -0.5|        0.3|Basic Expectations |
+|Affordable                     |   0.2|   0.3|        0.1|NA                 |
+|Attractive Styling             |  -0.7|  -0.5|        0.2|Key Drivers        |
+|Customer-Oriented Dealerships  |   0.3|  -0.3|       -0.6|NA                 |
+|Dependable                     |  -0.6|  -0.1|        0.5|Key Drivers        |
+|Driver Comfort                 |  -0.6|  -0.2|        0.4|Key Drivers        |
+|Environmentally Friendly       |   0.3|   0.5|        0.2|NA                 |
+|Fuel Efficient                 |   0.9|   0.0|       -0.9|NA                 |
+|Fun to Drive                   |  -0.7|  -0.4|        0.3|Basic Expectations |
+|Lasts a Long Time              |  -0.9|  -0.6|        0.3|Key Drivers        |
+|Prestigious                    |  -1.0|  -0.5|        0.5|NA                 |
+|Quality Materials, Fit, Finish |  -0.9|  -0.5|        0.4|Key Drivers        |
+|Quick Acceleration             |  -0.1|  -0.6|       -0.5|NA                 |
+|Responsive Handling            |  -0.7|  -0.2|        0.5|Basic Expectations |
+|Retains Resale Value           |  -0.4|  -0.1|        0.3|NA                 |
+|Safe                           |  -0.6|  -0.1|        0.5|Key Drivers        |
+|Value for the Money            |  -0.2|   0.1|        0.3|NA                 |
