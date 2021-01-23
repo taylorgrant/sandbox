@@ -14,7 +14,7 @@
 
 theme_twg <- function(base_family="Roboto", base_size = 11.5,
                       plot_title_family=base_family, plot_title_size = 18,
-                      plot_title_face="bold", plot_title_margin = 4,
+                      plot_title_face="plain", plot_title_margin = 4,
                       subtitle_family="Roboto", subtitle_size = 12,
                       subtitle_face = "plain", subtitle_margin = 15,
                       strip_text_family = base_family, strip_text_size = 12,
