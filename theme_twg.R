@@ -12,14 +12,14 @@
 #' @param axis add x or y axes? `TRUE`, `FALSE`, "`xy`"
 #' @param ticks ticks if `TRUE` add ticks
 
-theme_twg <- function(base_family="Roboto", base_size = 11.5,
+theme_twg <- function(base_family="Helvetica Neue", base_size = 11.5,
                       plot_title_family=base_family, plot_title_size = 18,
                       plot_title_face="plain", plot_title_margin = 4,
-                      subtitle_family="Roboto", subtitle_size = 12,
+                      subtitle_family="Helvetica Neue", subtitle_size = 12,
                       subtitle_face = "plain", subtitle_margin = 15,
                       strip_text_family = base_family, strip_text_size = 12,
                       strip_text_face = "plain",
-                      caption_family = "Roboto", caption_size = 9,
+                      caption_family = "Helvetica Neue", caption_size = 9,
                       caption_face = "italic", caption_margin = 10,
                       axis_title_family = base_family, axis_title_size = 13,
                       axis_title_face = "plain", axis_title_just = "rt",
