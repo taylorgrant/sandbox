@@ -1,0 +1,23 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# sandbox
+
+Random projects that I take on from time to time
+
+### Mapping building footprints & heights
+
+Based on open data from the city of San Francisco and using `ggplot` and `sf` to plot. 
+```{r echo=FALSE, out.width = '50%'}
+knitr::include_graphics("mapping-sf/SF_building_map.png")
+```
