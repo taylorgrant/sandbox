@@ -1,6 +1,6 @@
 # Using python's wordcloud function since R's wordclouds aren't great
 # text should be preprocessed into single string via `prepare_text()` function
-generate_wordcloud <- function(text, max_words, title = NULL) {
+generate_wordcloud <- function(text, max_words, title = NULL, bg = "black") {
   
   if (is.vector(text) == FALSE) stop("Text must be in vector format...\n")
   library(reticulate)
@@ -9,7 +9,9 @@ generate_wordcloud <- function(text, max_words, title = NULL) {
   wc <- import("wordcloud")
   
   max_words <- as.integer(max_words)
-  wc = wc$WordCloud(width = 1600L, height = 500L, max_words = max_words)$generate(text)
+  wc = wc$WordCloud(width = 1600L, height = 500L, 
+                    background_color = bg, 
+                    max_words = max_words)$generate(text)
   # remove axis
   plt$axis("off")
   plt$imshow(wc, interpolation = "bilinear")
